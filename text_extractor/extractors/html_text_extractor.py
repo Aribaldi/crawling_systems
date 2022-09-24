@@ -1,7 +1,7 @@
 from typing import Iterable
+import re
 from common.text_extractor import TextExtractor
 from bs4 import BeautifulSoup, Tag
-import re
 
 
 class HtmlTextExtractor(TextExtractor):
