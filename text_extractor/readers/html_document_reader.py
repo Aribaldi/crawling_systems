@@ -1,5 +1,7 @@
+from bs4 import BeautifulSoup
 from common.document_reader import DocumentReader
 import requests
+from extraction_objects.html_extraction_object import HtmlExtractionObject
 
 
 class RemoteHtmlReader(DocumentReader):
@@ -7,11 +9,13 @@ class RemoteHtmlReader(DocumentReader):
         super().__init__()
         self.headers = headers
 
-    def read(self, path: str) -> str:
-        return requests.get(path, headers=self.headers).text
+    def read(self, path: str) -> HtmlExtractionObject:
+        markup = requests.get(path, headers=self.headers).text
+        return HtmlExtractionObject(BeautifulSoup(markup))
 
 
 class LocalHtmlReader(DocumentReader):
-    def read(self, path: str) -> str:
+    def read(self, path: str) -> HtmlExtractionObject:
         with open(path, 'r') as file:
-            return file.read()
+            markup = file.read()
+            return HtmlExtractionObject(BeautifulSoup(markup))

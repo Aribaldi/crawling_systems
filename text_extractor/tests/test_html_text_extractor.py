@@ -1,10 +1,16 @@
 import unittest
+
+from bs4 import BeautifulSoup
 from extractors.html_text_extractor import HtmlTextExtractor
+from extraction_objects.html_extraction_object import HtmlExtractionObject
 
 
 class TestHtmlTextExtractor(unittest.TestCase):
     def setUp(self):
         self.extractor = HtmlTextExtractor()
+
+    def make_object(self, markup: str) -> HtmlExtractionObject:
+        return HtmlExtractionObject(BeautifulSoup(markup))
 
     def test_only_body_text_extraction(self):
         markup = '''
@@ -21,10 +27,11 @@ class TestHtmlTextExtractor(unittest.TestCase):
                 </body>
             </html>
         '''
-        self.assertEqual(self.extractor.extract(markup), 'Test paragraph')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'Test paragraph')
 
     def test_header_removal(self):
-        header_markup = '''
+        markup = '''
             <body>
                 <header>
                     Test header
@@ -34,13 +41,14 @@ class TestHtmlTextExtractor(unittest.TestCase):
                 </p>
             </body>
         '''
+        obj = self.make_object(markup)
         self.assertEqual(
-            self.extractor.extract(header_markup),
+            self.extractor.extract(obj),
             'Some test text'
         )
 
     def test_footer_removal(self):
-        footer_markup = '''
+        markup = '''
             <body>
                 <p>
                     Some test text
@@ -50,13 +58,14 @@ class TestHtmlTextExtractor(unittest.TestCase):
                 </footer>
             </body>
         '''
+        obj = self.make_object(markup)
         self.assertEqual(
-            self.extractor.extract(footer_markup),
+            self.extractor.extract(obj),
             'Some test text'
         )
 
     def test_code_removal(self):
-        code_markup = '''
+        markup = '''
             <body>
                 <code>
                     main :: IO ()
@@ -65,10 +74,11 @@ class TestHtmlTextExtractor(unittest.TestCase):
                 result
             </body>
         '''
-        self.assertEqual(self.extractor.extract(code_markup), 'result')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'result')
 
     def test_table_removal(self):
-        table_markup = '''
+        markup = '''
         <body>
             <table>
                 cell goes brrrrrr
@@ -76,34 +86,38 @@ class TestHtmlTextExtractor(unittest.TestCase):
             result
         </body>
         '''
-        self.assertEqual(self.extractor.extract(table_markup), 'result')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'result')
 
     def test_image_removal(self):
-        image_markup = '''
+        markup = '''
             <body>
                 <img src="me_testing_this_code.jpg">
                 result
             </body>
         '''
-        self.assertEqual(self.extractor.extract(image_markup), 'result')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'result')
 
     def test_link_anchors_removal(self):
-        image_markup = '''
+        markup = '''
             <body>
                 <a href="example.com">example.com</a>
                 <p>Test</p>
             </body>
         '''
-        self.assertEqual(self.extractor.extract(image_markup), 'Test')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'Test')
 
     def test_text_anchors_saving(self):
-        image_markup = '''
+        markup = '''
             <body>
                 <a href="example.com">link</a>
                 <p>Test</p>
             </body>
         '''
-        self.assertEqual(self.extractor.extract(image_markup), 'link\nTest')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'link\nTest')
 
     def test_link_removal_from_text(self):
         markup = '''
@@ -112,31 +126,32 @@ class TestHtmlTextExtractor(unittest.TestCase):
                 <p>Test</p>
             </body>
         '''
-        self.assertEqual(self.extractor.extract(markup), 'Test')
+        obj = self.make_object(markup)
+        self.assertEqual(self.extractor.extract(obj), 'Test')
 
     def test_multiple_spaces_replacing(self):
-        spaces_markup = '''
+        markup = '''
             <body>
                 <p>Test         Test</p>
                 <p>Test     Test</p>
             </body>
         '''
-
+        obj = self.make_object(markup)
         self.assertEqual(
-            self.extractor.extract(spaces_markup),
+            self.extractor.extract(obj),
             'Test Test\nTest Test'
         )
 
     def test_strings_trimming(self):
-        spaces_markup = '''
+        markup = '''
             <body>
                 <p>  Test    </p>
                 <p> Test         </p>
             </body>
         '''
-
+        obj = self.make_object(markup)
         self.assertEqual(
-            self.extractor.extract(spaces_markup),
+            self.extractor.extract(obj),
             'Test\nTest'
         )
 

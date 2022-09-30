@@ -3,6 +3,8 @@ import re
 from common.text_extractor import TextExtractor
 from bs4 import BeautifulSoup, Tag
 
+from extraction_objects.html_extraction_object import HtmlExtractionObject
+
 
 class HtmlTextExtractor(TextExtractor):
     def __init__(self):
@@ -14,8 +16,8 @@ class HtmlTextExtractor(TextExtractor):
             r'''(?:(?:(?:\/{0,1}(?:[a-zA-Z0-9\-\_\=\-]){1,})*)(?:[?][a-zA-Z0-9\=\%\&\_\-]{1,}){0,1})'''\
             r'''(?:\.(?:[a-zA-Z0-9]){0,}){0,1})'''
 
-    def extract(self, markup: str) -> str:
-        soup = BeautifulSoup(markup, 'html.parser')
+    def extract(self, extraction_object: HtmlExtractionObject) -> str:
+        soup = extraction_object.content
         extracted_text = ''
         body_tag = soup.select_one('body')
 
