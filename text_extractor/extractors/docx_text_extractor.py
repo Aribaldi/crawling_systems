@@ -1,7 +1,8 @@
 from common.text_extractor import TextExtractor
-from docx import Document
 from common.extraction_object import ExtractionObject
 import re
+from readers.word_document_reader import LocalWordReader
+from pathlib import Path
 
 class DocxTextExtractor(TextExtractor):
     def __init__(self) -> None:
@@ -22,7 +23,8 @@ class DocxTextExtractor(TextExtractor):
 
 
 if __name__ == "__main__":
-    doc = ExtractionObject(Document("./test.docx"))
     extr = DocxTextExtractor()
+    reader = LocalWordReader()
+    doc = reader.read(Path("data_examples/test3.doc"))
     print(extr.extract(doc))
 
