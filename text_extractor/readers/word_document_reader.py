@@ -10,5 +10,5 @@ class LocalWordReader(DocumentReader):
             res = DocxExtractionObject(Document(str(file_path)))
             return res
         elif file_path.suffix == ".doc":
-            os.system(f"lowriter --convert-to docx ./{file_path}")
-            return DocxExtractionObject(Document(f"{file_path.stem}.docx"))
+            os.system(f"lowriter --convert-to docx {file_path} --outdir ./data_examples")
+            return DocxExtractionObject(Document(f"./data_examples/{file_path.stem}.docx"))
