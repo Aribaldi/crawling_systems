@@ -1,7 +1,7 @@
 from common.extraction_object import ExtractionObject
-from PyPDF2 import PdfReader
+from pdfx import PDFx
 
 
 class PdfExtractionObject(ExtractionObject):
-    def __init__(self, content: PdfReader):
+    def __init__(self, content: PDFx):
         super().__init__(content)

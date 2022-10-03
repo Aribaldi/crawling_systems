@@ -1,20 +1,14 @@
 from typing import Iterable
 import re
 from common.text_extractor import TextExtractor
-from bs4 import BeautifulSoup, Tag
+from bs4 import Tag
 
 from extraction_objects.html_extraction_object import HtmlExtractionObject
 
 
 class HtmlTextExtractor(TextExtractor):
     def __init__(self):
-        super().__init__()
-        self.url_pattern = r'''((?:(?<=[^a-zA-Z0-9])''' \
-            r'''(?:(?:https?\:\/\/){0,1}(?:[a-zA-Z0-9\%]{1,}\:[a-zA-Z0-9\%]{1,}[@]){,1})'''\
-            r'''(?:(?:\w{1,}\.{1}){1,5}(?:(?:[a-zA-Z]){1,})|'''\
-            r'''(?:[a-zA-Z]{1,}\/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\:[0-9]{1,4}){1})){1}'''\
-            r'''(?:(?:(?:\/{0,1}(?:[a-zA-Z0-9\-\_\=\-]){1,})*)(?:[?][a-zA-Z0-9\=\%\&\_\-]{1,}){0,1})'''\
-            r'''(?:\.(?:[a-zA-Z0-9]){0,}){0,1})'''
+        TextExtractor.__init__(self)
 
     def extract(self, extraction_object: HtmlExtractionObject) -> str:
         soup = extraction_object.content
@@ -32,17 +26,9 @@ class HtmlTextExtractor(TextExtractor):
 
             extracted_text = body_tag.get_text()
 
-            # removing links in resulting text
-            extracted_text = re.sub(self.url_pattern, '', extracted_text)
+            extracted_text = self._clean_text(extracted_text)
 
-            # replacing multiple spaces with only one
-            extracted_text = re.sub(r'[^\S\r\n]+', ' ', extracted_text)
-
-            # removing spaces in from of linebreaks
-            extracted_text = re.sub(r'[\s]+\n', '\n', extracted_text)
-
-        # striping all lines
-        return '\n'.join([line.strip() for line in extracted_text.strip().splitlines()])
+        return extracted_text
 
     def _filter_link_tags(self, body_tag: Tag):
         link_tags = body_tag.find_all('a')

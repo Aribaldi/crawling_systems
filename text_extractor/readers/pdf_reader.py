@@ -1,8 +1,8 @@
-from PyPDF2 import PdfReader
+from pdfx import PDFx
 from common.document_reader import DocumentReader
 from extraction_objects.pdf_extraction_object import PdfExtractionObject
 
 
-class PdfDocumentReader(DocumentReader):
+class PdfReader(DocumentReader):
     def read(self, path: str) -> PdfExtractionObject:
-        return PdfExtractionObject(PdfReader(path))
+        return PdfExtractionObject(PDFx(path))
