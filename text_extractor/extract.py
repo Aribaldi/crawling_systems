@@ -6,10 +6,14 @@ from readers.html_reader import LocalHtmlReader
 from readers.pdf_reader import PdfReader
 from extractors.html_text_extractor import HtmlTextExtractor
 from extractors.pdf_text_extractor import PdfTextExtractor
+from readers.word_document_reader import LocalWordReader
+from extractors.docx_text_extractor import DocxTextExtractor
 
 format_mapping = {
     '.html': (LocalHtmlReader(), HtmlTextExtractor()),
     '.pdf': (PdfReader(), PdfTextExtractor()),
+    '.doc': (LocalWordReader(), DocxTextExtractor()),
+    '.docx': (LocalWordReader(), DocxTextExtractor())
 }
 
 

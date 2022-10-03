@@ -2,13 +2,14 @@ from common.document_reader import DocumentReader
 from extraction_objects.docx_extraction_object import DocxExtractionObject
 import os
 from docx import Document
-from pathlib import Path
+import os
 
 class LocalWordReader(DocumentReader):        
-    def read(self, file_path : Path) -> DocxExtractionObject:
-        if file_path.suffix == ".docx":
-            res = DocxExtractionObject(Document(str(file_path)))
+    def read(self, file_path : str) -> DocxExtractionObject:
+        file, extension = os.path.splitext(file_path)
+        if extension == ".docx":
+            res = DocxExtractionObject(Document(file_path))
             return res
-        elif file_path.suffix == ".doc":
+        elif extension == ".doc":
             os.system(f"lowriter --convert-to docx {file_path} --outdir ./data_examples")
-            return DocxExtractionObject(Document(f"./data_examples/{file_path.stem}.docx"))
+            return DocxExtractionObject(Document(f"{file}.docx"))
