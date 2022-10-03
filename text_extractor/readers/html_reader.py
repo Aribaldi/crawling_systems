@@ -11,11 +11,11 @@ class RemoteHtmlReader(DocumentReader):
 
     def read(self, path: str) -> HtmlExtractionObject:
         markup = requests.get(path, headers=self.headers).text
-        return HtmlExtractionObject(BeautifulSoup(markup))
+        return HtmlExtractionObject(BeautifulSoup(markup, features='html.parser'))
 
 
 class LocalHtmlReader(DocumentReader):
     def read(self, path: str) -> HtmlExtractionObject:
         with open(path, 'r') as file:
             markup = file.read()
-            return HtmlExtractionObject(BeautifulSoup(markup))
+            return HtmlExtractionObject(BeautifulSoup(markup, features='html.parser'))
