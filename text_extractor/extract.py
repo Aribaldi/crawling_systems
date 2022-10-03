@@ -20,7 +20,7 @@ format_mapping = {
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Script for parsing text from various document formats.',
+        description='Script for parsing text from html, pdf, doc/docx formats.',
     )
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     group.add_argument(
         '--path',
         type=str,
-        help=('path where file is stored'),
+        help=('local path where file is stored'),
     )
 
     args = parser.parse_args()
