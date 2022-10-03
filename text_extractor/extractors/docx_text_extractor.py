@@ -4,6 +4,7 @@ import re
 from readers.word_document_reader import LocalWordReader
 from pathlib import Path
 
+
 class DocxTextExtractor(TextExtractor):
     def __init__(self) -> None:
         super().__init__()
@@ -14,12 +15,10 @@ class DocxTextExtractor(TextExtractor):
         for para in document.paragraphs:
             if para.style.name != "Caption":
                 temp_line = para.text
-                temp_line = re.sub(r'[^\S\r\n]+', ' ', temp_line)
-                temp_line = temp_line.strip()
                 res_text.append(temp_line)
             else:
                 continue
-        return " ".join(res_text)
+        return self._clean_text(" ".join(res_text))
 
 
 if __name__ == "__main__":
@@ -27,4 +26,3 @@ if __name__ == "__main__":
     reader = LocalWordReader()
     doc = reader.read(Path("data_examples/test3.doc"))
     print(extr.extract(doc))
-
