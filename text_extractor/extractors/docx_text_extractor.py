@@ -1,8 +1,8 @@
 from common.text_extractor import TextExtractor
 from common.extraction_object import ExtractionObject
-import re
 from readers.word_document_reader import LocalWordReader
 from pathlib import Path
+import unicodedata
 
 
 class DocxTextExtractor(TextExtractor):
@@ -15,10 +15,10 @@ class DocxTextExtractor(TextExtractor):
         for para in document.paragraphs:
             if para.style.name != "Caption":
                 temp_line = para.text
-                res_text.append(temp_line)
+                res_text.append(unicodedata.normalize("NFKC", temp_line))
             else:
                 continue
-        return self._clean_text(" ".join(res_text))
+        return self.clean_text(" ".join(res_text))
 
 
 if __name__ == "__main__":

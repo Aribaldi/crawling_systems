@@ -2,7 +2,6 @@ from common.document_reader import DocumentReader
 from extraction_objects.docx_extraction_object import DocxExtractionObject
 import os
 from docx import Document
-import os
 
 class LocalWordReader(DocumentReader):        
     def read(self, file_path : str) -> DocxExtractionObject:

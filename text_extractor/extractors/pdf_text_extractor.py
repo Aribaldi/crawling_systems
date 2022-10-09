@@ -9,5 +9,5 @@ class PdfTextExtractor(TextExtractor):
     def extract(self, extraction_object: PdfExtractionObject) -> str:
         text = extraction_object.content.get_text()
         extraction_object.content.stream.close()
-        text = self._clean_text(text)
+        text = self.clean_text(text)
         return text

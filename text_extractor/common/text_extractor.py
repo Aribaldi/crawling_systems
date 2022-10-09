@@ -14,7 +14,7 @@ class TextExtractor:
     def extract(self, extraction_object: ExtractionObject) -> str:
         pass
 
-    def _clean_text(self, text: str) -> str:
+    def clean_text(self, text: str) -> str:
         # removing links in resulting text
         text = re.sub(self.url_pattern, '', text)
 

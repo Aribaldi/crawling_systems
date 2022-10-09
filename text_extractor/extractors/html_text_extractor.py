@@ -26,7 +26,7 @@ class HtmlTextExtractor(TextExtractor):
 
             extracted_text = body_tag.get_text()
 
-            extracted_text = self._clean_text(extracted_text)
+            extracted_text = self.clean_text(extracted_text)
 
         return extracted_text
 
