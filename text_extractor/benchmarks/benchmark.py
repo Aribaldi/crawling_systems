@@ -2,8 +2,10 @@ import timeit
 from pathlib import Path
 from extractors.pdf_text_extractor import PdfTextExtractor
 from extractors.docx_text_extractor import DocxTextExtractor
+from extractors.html_text_extractor import HtmlTextExtractor
 from readers.pdf_reader import PdfReader
 from readers.word_document_reader import LocalWordReader
+from readers.html_reader import LocalHtmlReader
 from common.text_extractor import TextExtractor
 from common.document_reader import DocumentReader
 import os
@@ -11,8 +13,8 @@ from functools import partial
 import statistics
 import pandas as pd
 
-
-root = Path("./tests/benchmark/")
+current_dir = os.path.abspath(os.path.dirname(__file__))
+root = Path(os.path.join(current_dir, '..', 'tests', 'benchmark'))
 
 def read_extract(path: str, extractor: TextExtractor, reader: DocumentReader):
     temp = reader.read(str(path))
@@ -36,12 +38,14 @@ def folder_wrapper(folder_path, extr, reader):
 def aggregate():
     res = {
         "docx" : [],
-        "pdf" : []
+        "pdf" : [],
+        "html" : []
     }
 
     format_mapping = {
         'docx': (LocalWordReader(), DocxTextExtractor()),
-        'pdf': (PdfReader(), PdfTextExtractor())
+        'pdf': (PdfReader(), PdfTextExtractor()),
+        'html': (LocalHtmlReader(), HtmlTextExtractor())
     }
 
     for key in format_mapping:
@@ -52,8 +56,9 @@ def aggregate():
     res = pd.DataFrame(res)
     res["docx"] = res["docx"].apply(lambda x: f"{x // 1:.0f}s {x % 1 * 1e3:.0f}ms")
     res["pdf"] = res["pdf"].apply(lambda x: f"{x // 1:.0f}s {x % 1 * 1e3:.0f}ms")
+    res["html"] = res["html"].apply(lambda x: f"{x // 1:.0f}s {x % 1 * 1e3:.0f}ms")
     res.index = ["mean_short", "mean_long"]
-    res.to_csv("./benchmarks/benchmark.csv")
+    res.to_csv(os.path.join(current_dir, "benchmark.csv"))
     return res
 
 
