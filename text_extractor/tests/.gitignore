@@ -1,0 +1,5 @@
+*
+!.gitignore
+!*.py
+!/test_examples/
+!/benchmark/
