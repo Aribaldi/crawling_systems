@@ -1,15 +1,14 @@
 from os import path
 import unittest
-from extractors.docx_text_extractor import DocxTextExtractor
-from extraction_objects.docx_extraction_object import DocxExtractionObject
-from docx import Document
 import unicodedata
+import re
 from hypothesis import given, note, settings, strategies as st
+from docx import Document
+from extractors.docx_text_extractor import DocxTextExtractor
 from extractors.html_text_extractor import HtmlTextExtractor
 from readers.html_reader import RemoteHtmlReader
-from extraction_objects.html_extraction_object import HtmlExtractionObject
-import re
-import operator
+from extraction_objects.docx_extraction_object import DocxExtractionObject
+
 
 class TestDocxTextExtractor(unittest.TestCase):
     def setUp(self):
@@ -122,3 +121,37 @@ class TestDocxTextExtractor(unittest.TestCase):
             ]
         ])
         self.assertTrue(res_predicate)
+
+    def test_no_alphabetic_chars(self):
+        doc = Document()
+        test_text = '!"#$%&\'()*+,-./0123456789:;<=>?@[\]^_`{|}‘’‚‛“”„'
+        doc.add_paragraph(test_text)
+        obj = DocxExtractionObject(doc)
+        self.assertEqual(
+            self.extractor.extract(obj),
+            test_text
+        )
+
+    def test_latin_alphabet(self):
+        doc = Document()
+        capital_alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        alphabet = 'abcdefghijklmnopqrstuvwxyz'
+        text = f'{capital_alphabet}\n{alphabet}'
+        doc.add_paragraph(text)
+        obj = DocxExtractionObject(doc)
+        self.assertEqual(
+            self.extractor.extract(obj),
+            text
+        )
+
+    def test_cyrillic_alphabet(self):
+        doc = Document()
+        capital_alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+        alphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+        text = f'{capital_alphabet}\n{alphabet}'
+        doc.add_paragraph(text)
+        obj = DocxExtractionObject(doc)
+        self.assertEqual(
+            self.extractor.extract(obj),
+            text
+        )
