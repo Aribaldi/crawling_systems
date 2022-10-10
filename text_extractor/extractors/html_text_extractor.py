@@ -1,8 +1,8 @@
 from typing import Iterable
 import re
+import unicodedata
 from common.text_extractor import TextExtractor
 from bs4 import Tag
-
 from extraction_objects.html_extraction_object import HtmlExtractionObject
 
 
@@ -25,8 +25,9 @@ class HtmlTextExtractor(TextExtractor):
             self._filter_link_tags(body_tag)
 
             extracted_text = body_tag.get_text()
-
-            extracted_text = self.clean_text(extracted_text)
+            extracted_text = self.clean_text(
+                unicodedata.normalize("NFKC", extracted_text)
+            )
 
         return extracted_text
 
