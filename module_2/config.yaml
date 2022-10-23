@@ -1,0 +1,20 @@
+start_datetime: "2022-01-01"
+access_params:
+  login: "YOUR_VK_LOGIN"
+  password: "YOUR_VK_PASSWORD"
+queries:
+  spbu:
+    - spbu
+    - спбгу
+  msu:
+    - msu
+    - мгу
+filter_words:
+  spbu:
+    - spbu
+    - спбгу
+    - санкт-петербургский государственный университет
+  msu:
+    - msu
+    - мгу
+    - московский государственный университет
