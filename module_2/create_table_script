@@ -1,0 +1,18 @@
+CREATE TABLE post(
+	post_group_id SERIAL PRIMARY KEY,
+	post_id INT,
+	group_id INT,
+	publisher_id INT,
+	date INT,
+	text TEXT,
+	comments INT,
+	likes INT,
+	reports INT,
+	views INT,
+	crawler_name VARCHAR(20)
+);
+
+CREATE TABLE group_cache(
+	group_id INT PRIMARY KEY,
+	crawler_name VARCHAR(20)
+);

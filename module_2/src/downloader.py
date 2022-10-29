@@ -4,7 +4,6 @@ import time
 from typing import List
 import vk_api
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -12,8 +11,9 @@ class Downloader:
     def __init__(self, vk, start_datetime):
         self.vk = vk
         self.start_datetime = datetime.fromisoformat(start_datetime)
+        self.post_fields = ["id", "from_id", "date", "text", "comments", "likes", "reposts", "views", "signer_id"]
 
-    def get_groups_by_query(self, query: str, count: int = 100) -> List:
+    def get_groups_by_query(self, query: str, count: int = 2) -> List:
         group_ids = []
         while len(group_ids) < count:
             try:
@@ -36,26 +36,24 @@ class Downloader:
             logger.info(f"Found {len(group_ids)} groups")
         return group_ids
 
-    def download_records_from_group(self, group_id: int) -> List:
+    def download_posts_from_group(self, group_id: int) -> List:
         if group_id > 0:
             group_id = -group_id
         start_time = time.time()
-        records = []
+        posts = []
         last_record_datetime = datetime.now()
         try:
             while last_record_datetime > self.start_datetime:
-                new_records = self.vk.wall.get(owner_id=[group_id], count=100, offset=len(records))["items"]
-                if len(new_records) == 0:
+                new_posts = self.vk.wall.get(owner_id=[group_id], count=100, offset=len(posts),
+                                             extended=1, field=self.post_fields)["items"]
+                new_posts = list(filter(lambda post: datetime.fromtimestamp(post["date"]) > self.start_datetime,
+                                        new_posts))
+                if len(new_posts) == 0:
                     break
-                records.extend(new_records)
-                last_record_datetime = datetime.fromtimestamp(records[-1]["date"])
-                records.extend([
-                    record
-                    for record in new_records
-                    if datetime.fromtimestamp(record["date"]) > self.start_datetime
-                ])
-            logger.info(f"Found {len(records)} records. Downloading took {int(time.time() - start_time)} seconds")
+                posts.extend(new_posts)
+                last_record_datetime = datetime.fromtimestamp(posts[-1]["date"])
+            logger.info(f"Found {len(posts)} posts. Downloading took {int(time.time() - start_time)} seconds")
         except vk_api.exceptions.ApiError as err:
-            print(f"Next error was caught: \"{str(err)}\"")
-        return records
+            logger.warning(f"Next error was caught: \"{str(err)}\"")
+        return posts
 
