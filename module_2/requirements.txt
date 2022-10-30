@@ -1,3 +1,4 @@
-logging==0.5.1.2
+#logging==0.5.1.2
 PyYAML==6.0
 vk_api==11.9.9
+unittest2==1.1.0
