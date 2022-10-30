@@ -1,9 +1,12 @@
 import re
 from typing import Dict
+import logging
+
+logger = logging.getLogger(__name__)
 
 from src.post import Post
 
-FIELD_KEYS = ["id", "owner_id", "from_id", "date", "text", "comment", "likes", "reposts", "views"]
+FIELD_KEYS = ["id", "owner_id", "from_id", "date", "text", "comments", "likes", "reposts"]
 
 
 def preprocess_text(text):
@@ -11,12 +14,19 @@ def preprocess_text(text):
     text = re.sub("ё", "е", text)
     text = re.sub(r"\[[^\[\]|]+\|([A-Za-zа-яА-я\d ]+)]", "\1", text)
     text = re.sub(r"(https:\/\/|http:\/\/|www.)([\w.\/\-\?\&\=])+", " ", text)
-    text = re.sub(r"[^A-Za-zА-Яа-я\d!\"\',:;%\-\.\?\*\(\)\/ ]", " ", text)
+    # text = re.sub("‘’‛", "", text)
+    # text = re.sub('“”„«»', "", text)
+    text = re.sub(r"[^A-Za-zА-Яа-я\d!,:;%\-\.\?\*\(\)\/ ]", " ", text)
+    text = re.sub("\s+", ' ', text)
     return text.strip()
 
 
 def select_fields(post_dict):
-    if all(key in post_dict for key in FIELD_KEYS):
+    absent_fields = [key for key in FIELD_KEYS if key not in post_dict]
+
+    if len(absent_fields) == 0:
+        if "views" not in post_dict:
+            post_dict["views"] = {"count": "NULL"}
         return Post(
             post_id=post_dict["id"],
             group_id=post_dict["owner_id"],
@@ -29,6 +39,7 @@ def select_fields(post_dict):
             views=post_dict["views"]["count"],
         )
     else:
+        logger.warning(f"post {post_dict['id']} has not next fields: {str(absent_fields)}")
         return None
 
 

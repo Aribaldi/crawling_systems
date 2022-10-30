@@ -13,18 +13,20 @@ class Downloader:
         self.start_datetime = datetime.fromisoformat(start_datetime)
         self.post_fields = ["id", "from_id", "date", "text", "comments", "likes", "reposts", "views", "signer_id"]
 
-    def get_groups_by_query(self, query: str, count: int = 2) -> List:
+    def get_groups_by_query(self, query: str, count: int = 100) -> List:
         group_ids = []
         while len(group_ids) < count:
             try:
                 new_group_ids = self.vk.groups.search(
                     q=query,
                     offset=len(group_ids),
-                    count=max(count - len(group_ids), 100)
+                    count=min(count - len(group_ids), 100)
                 )["items"]
                 if len(new_group_ids) == 0:
                     break
-                group_ids.extend([-new_group_ids[i]["id"] for i in range(count - len(group_ids))])
+                group_ids.extend(
+                    [(-new_group_ids[i]["id"], new_group_ids[i]["name"]) for i in range(count - len(group_ids))]
+                )
             except vk_api.exceptions.ApiError as err:
                 logger.warning(f"Next error was caught: \"{str(err)}\". Continue downloading from the next query")
 
@@ -36,7 +38,7 @@ class Downloader:
             logger.info(f"Found {len(group_ids)} groups")
         return group_ids
 
-    def download_posts_from_group(self, group_id: int) -> List:
+    def download_posts_from_group(self, group_id: int, group_name) -> List:
         if group_id > 0:
             group_id = -group_id
         start_time = time.time()
@@ -52,7 +54,8 @@ class Downloader:
                     break
                 posts.extend(new_posts)
                 last_record_datetime = datetime.fromtimestamp(posts[-1]["date"])
-            logger.info(f"Found {len(posts)} posts. Downloading took {int(time.time() - start_time)} seconds")
+            logger.info(f"Found {len(posts)} posts from group \"{group_name}\". " +
+                        f"Downloading took {int(time.time() - start_time)} seconds")
         except vk_api.exceptions.ApiError as err:
             logger.warning(f"Next error was caught: \"{str(err)}\"")
         return posts

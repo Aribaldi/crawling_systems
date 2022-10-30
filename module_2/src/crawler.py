@@ -32,7 +32,8 @@ class Crawler:
 
     def get_posts(self):
         while len(self.downloader_queue) > 0:
-            new_posts = self.downloader.download_posts_from_group(self.downloader_queue.pop())
+            group_id, group_name = self.downloader_queue.pop()
+            new_posts = self.downloader.download_posts_from_group(group_id, group_name)
             if len(new_posts) > 0:
                 self.parser_queue.push(new_posts)
 
@@ -40,7 +41,6 @@ class Crawler:
         while len(self.parser_queue) > 0:
             parsed_post = self.parser.parse(self.parser_queue.pop())
             if parsed_post is not None:
-                logger.info("Saving new post to storage")
                 self.storage.store_post(parsed_post)
 
     def close_storage(self):
