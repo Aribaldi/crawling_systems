@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from src.queue import CachedQueue
 from src.storage import PostgresDB
@@ -23,19 +24,25 @@ class Crawler:
         self.storage = storage
         self.queries = queries
 
-    def get_groups(self):
+    def get_posts_by_query(self, count: Optional[int] = None):
         for query in self.queries:
-            logger.info(f"Searching groups by query {query}")
-            group_ids = self.downloader.get_groups_by_query(query=query)
-            if len(group_ids) > 0:
-                self.downloader_queue.push(group_ids)
+            logger.info(f"Searching posts by query \"{query}\"")
+            self.downloader.get_posts_by_query(query=query,
+                                               queue_to_push=self.parser_queue,
+                                               count=count)
 
-    def get_posts(self):
+    def get_groups_by_query(self, count: int = 100):
+        for query in self.queries:
+            logger.info(f"Searching groups by query \"{query}\"")
+            self.downloader.get_groups_by_query(query=query,
+                                                queue_to_push=self.downloader_queue,
+                                                count=count)
+
+    def get_posts_from_groups(self,  count: Optional[int] = None):
         while len(self.downloader_queue) > 0:
-            group_id, group_name = self.downloader_queue.pop()
-            new_posts = self.downloader.download_posts_from_group(group_id, group_name)
-            if len(new_posts) > 0:
-                self.parser_queue.push(new_posts)
+            self.downloader.get_posts_from_group(group=self.downloader_queue.pop(),
+                                                 queue_to_push=self.parser_queue,
+                                                 count=count)
 
     def parse_posts(self):
         while len(self.parser_queue) > 0:
