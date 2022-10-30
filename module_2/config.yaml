@@ -1,7 +1,12 @@
 start_datetime: "2022-01-01"
-access_params:
-  login: "YOUR_VK_LOGIN"
-  password: "YOUR_VK_PASSWORD"
+vk:
+  login: YOUR_VK_LOGIN
+  password: YOUR_VK_PASSWORD
+db:
+  host: localhost
+  db_name: crawler_storage
+  user_name: postgres
+  password: YOUR_DATABASE_PASSWORD
 queries:
   spbu:
     - spbu

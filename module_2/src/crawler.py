@@ -1,9 +1,7 @@
 import logging
-from typing import List, Optional
 
-from src.downloader import Downloader
-from src.queue import Queue
-from src.parser import Parser
+from src.queue import CachedQueue
+from src.storage import PostgresDB
 
 logger = logging.getLogger(__name__)
 
@@ -11,26 +9,42 @@ logger = logging.getLogger(__name__)
 class Crawler:
     def __init__(
             self,
-            vk,
-            filter_words: List[str],
-            queries: List[str],
-            start_datetime: str,
-            init_groups: Optional[List] = None
+            downloader,
+            downloader_queue,
+            parser,
+            parser_queue,
+            storage,
+            queries,
     ):
-        self.downloader = Downloader(vk, start_datetime=start_datetime)
-        self.downloader_queue = Queue(init_items=init_groups)
-        self.parser = Parser(filter_words)
-        self.parser_queue = Queue()
+        self.downloader = downloader
+        self.downloader_queue = downloader_queue
+        self.parser = parser
+        self.parser_queue = parser_queue
+        self.storage = storage
         self.queries = queries
 
-    def surf(self):
+    def get_groups(self):
         for query in self.queries:
             logger.info(f"Searching groups by query {query}")
             group_ids = self.downloader.get_groups_by_query(query=query)
             if len(group_ids) > 0:
                 self.downloader_queue.push(group_ids)
 
+    def get_posts(self):
         while len(self.downloader_queue) > 0:
-            new_records = self.downloader.download_records_from_group(self.downloader_queue.pop())
-            if len(new_records) > 0:
-                self.parser_queue.push(new_records)
+            group_id, group_name = self.downloader_queue.pop()
+            new_posts = self.downloader.download_posts_from_group(group_id, group_name)
+            if len(new_posts) > 0:
+                self.parser_queue.push(new_posts)
+
+    def parse_posts(self):
+        while len(self.parser_queue) > 0:
+            parsed_post = self.parser.parse(self.parser_queue.pop())
+            if parsed_post is not None:
+                self.storage.store_post(parsed_post)
+
+    def close_storage(self):
+        if isinstance(self.downloader_queue, CachedQueue) and isinstance(self.storage, PostgresDB):
+            self.storage.store_cache(self.downloader_queue.cache)
+        self.storage.close()
+
