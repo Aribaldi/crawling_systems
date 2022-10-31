@@ -39,13 +39,13 @@ class PostgresDB(Storage):
 
     def store_post(self, post):
         self.db.execute("INSERT INTO post(post_id, group_id, publisher_id, date_unix, text, " +
-                        "comments, likes, reports, views, crawler_name)\n" +
+                        "comments, likes, reposts, views, crawler_name)\n" +
                         f"VALUES ({post.post_id}, {post.group_id}, {post.publisher_id}, {post.date}, '{post.text}', " +
                         f"{post.comments}, {post.likes}, {post.reposts}, {post.views}, '{self.crawler_name}');")
 
     def load_posts(self):
         self.db.execute("SELECT post_id, group_id, publisher_id, date_unix, text, " +
-                        "comments, likes, reports, views, crawler_name FROM post")
+                        "comments, likes, reposts, views, crawler_name FROM post")
 
         posts = self.db.fetchall()
         posts = [Post(*post) for post in posts]

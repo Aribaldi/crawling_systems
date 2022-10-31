@@ -1,7 +1,8 @@
 from datetime import datetime
 import logging
+import random
 import time
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 import vk_api
 
 from src.queue import Queue
@@ -21,8 +22,14 @@ class Downloader:
         start_time = time.time()
         while last_record_datetime > self.start_datetime and (count is not None and n_posts < count):
             next_count = 200 if count is None or count - n_posts > 200 else count - n_posts
-            new_posts = self.vk.newsfeed.search(q=query, count=next_count, offset=n_posts,
-                                                extended=1, field=self.post_fields)["items"]
+            new_posts = self.vk.newsfeed.search(
+                q=query,
+                count=next_count,
+                offset=n_posts,
+                extended=1,
+                field=self.post_fields,
+                start_time=str(int(self.start_datetime.timestamp()))
+            )["items"]
             if not new_posts:
                 break
             last_record_datetime = datetime.fromtimestamp(new_posts[-1]["date"])
@@ -35,6 +42,9 @@ class Downloader:
                 break
             queue_to_push.push(new_posts)
             n_posts += len(new_posts)
+            if n_posts % 1_000 == 0:
+                logger.info(f"Found {n_posts} posts by query \"{query}\". Continue downloading ...")
+            time.sleep(random.uniform(0.1, 0.3))
 
         logger.info(f"Found {n_posts} posts by query \"{query}\". " +
                     f"Downloading took {int(time.time() - start_time)} seconds")

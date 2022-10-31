@@ -7,7 +7,7 @@ CREATE TABLE post(
 	text TEXT,
 	comments INT,
 	likes INT,
-	reports INT,
+	reposts INT,
 	views INT NULL,
 	crawler_name VARCHAR(20)
 );
@@ -17,4 +17,3 @@ CREATE TABLE group_cache(
 	group_name VARCHAR(30),
 	crawler_name VARCHAR(20)
 );
-

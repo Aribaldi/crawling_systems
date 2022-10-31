@@ -38,7 +38,7 @@ if __name__ == "__main__":
         )
 
     for crawler_name in crawlers:
-        crawlers[crawler_name].get_posts_by_query(count=2000)
+        crawlers[crawler_name].get_posts_by_query(count=1000000)
         crawlers[crawler_name].get_groups_by_query()
         crawlers[crawler_name].get_posts_from_groups()
         crawlers[crawler_name].parse_posts()
