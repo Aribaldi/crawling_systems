@@ -2,9 +2,9 @@ import re
 from typing import Dict
 import logging
 
-logger = logging.getLogger(__name__)
-
 from src.post import Post
+
+logger = logging.getLogger(__name__)
 
 FIELD_KEYS = ["id", "owner_id", "from_id", "date", "text", "comments", "likes", "reposts"]
 

@@ -32,13 +32,14 @@ if __name__ == "__main__":
             downloader=Downloader(vk, start_datetime=cfg["start_datetime"]),
             downloader_queue=CachedQueue(),
             parser=Parser(cfg["filter_words"][crawler_name]),
-            parser_queue=Queue(),
+            parser_queue=CachedQueue(),
             storage=PostgresDB(crawler_name=crawler_name, **cfg["db"]),
             queries=cfg["queries"][crawler_name],
         )
 
     for crawler_name in crawlers:
-        crawlers[crawler_name].get_groups()
-        crawlers[crawler_name].get_posts()
+        crawlers[crawler_name].get_posts_by_query(count=2000)
+        crawlers[crawler_name].get_groups_by_query()
+        crawlers[crawler_name].get_posts_from_groups()
         crawlers[crawler_name].parse_posts()
         crawlers[crawler_name].close_storage()

@@ -8,8 +8,6 @@ class Queue:
             self.push(init_items)
 
     def pop(self):
-        if self._queue[0] is None:
-            a = 1 + 1
         return self._queue.pop(0)
 
     def push(self, items):
@@ -29,9 +27,10 @@ class CachedQueue(Queue):
         super(CachedQueue, self).__init__(init_items)
 
     def _push(self, item):
-        if item not in self.cache:
+        key, item = item
+        if key not in self.cache:
             self._queue.append(item)
-            self.cache.add(item)
+            self.cache.add(key)
 
     def push(self, items):
         if not isinstance(items, List):
