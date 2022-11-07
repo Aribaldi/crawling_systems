@@ -45,7 +45,7 @@ class PostgresDB(Storage):
 
     def load_posts(self):
         self.db.execute("SELECT post_id, group_id, publisher_id, date_unix, text, " +
-                        "comments, likes, reports, views, crawler_name FROM post")
+                        "comments, likes, reports, views FROM post")
 
         posts = self.db.fetchall()
         posts = [Post(*post) for post in posts]
