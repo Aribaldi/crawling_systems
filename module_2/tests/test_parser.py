@@ -88,3 +88,15 @@ class TestParser(unittest.TestCase):
         self.payload['text'] = f'test text {s}'
         post = self.parser.parse(self.payload)
         self.assertEqual(post.text, 'test text ? .. (,: *?. %?/ ? ! * ,')
+
+    def test_cyrillic_alphabet(self):
+        alphabet='АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+        self.payload['text'] = f'test text {alphabet}'
+        post = self.parser.parse(self.payload)
+        self.assertEqual(post.text, 'test text абвгдеежзийклмнопрстуфхцчшщъыьэюя абвгдеежзийклмнопрстуфхцчшщъыьэюя')
+
+    def test_latin_alphabet(self):
+        alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz'
+        self.payload['text'] = f'test text {alphabet}'
+        post = self.parser.parse(self.payload)
+        self.assertEqual(post.text, 'test text abcdefghijklmnopqrstuvwxyz abcdefghijklmnopqrstuvwxyz')
