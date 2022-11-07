@@ -32,10 +32,10 @@ class PostgresDB(Storage):
         self.db = self.conn.cursor()
         self.crawler_name = crawler_name
 
-        # delete after debug
-        self.db.execute("DELETE FROM post")
-        self.db.execute("DELETE FROM group_cache")
-        self.conn.commit()
+        # # delete after debug
+        # self.db.execute("DELETE FROM post")
+        # self.db.execute("DELETE FROM group_cache")
+        # self.conn.commit()
 
     def store_post(self, post):
         self.db.execute("INSERT INTO post(post_id, group_id, publisher_id, date_unix, text, " +

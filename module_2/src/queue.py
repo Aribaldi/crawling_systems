@@ -1,7 +1,21 @@
 from typing import List, Optional
+import threading
 
 
-class Queue:
+class BaseQueue:
+    _queue = None
+
+    def pop(self):
+        raise NotImplementedError
+
+    def push(self, items):
+        raise NotImplementedError
+
+    def is_empty(self):
+        raise NotImplementedError
+
+
+class Queue(BaseQueue):
     def __init__(self, init_items: Optional[List] = None):
         self._queue = []
         if init_items is not None:
@@ -15,8 +29,8 @@ class Queue:
             items = [items]
         self._queue.extend(items)
 
-    def __len__(self):
-        return len(self._queue)
+    def is_empty(self):
+        return not bool(self._queue)
 
 
 class CachedQueue(Queue):
@@ -37,3 +51,31 @@ class CachedQueue(Queue):
             items = [items]
         for item in items:
             self._push(item)
+
+
+class MultiProcessQueue(BaseQueue):
+    def __init__(self):
+        self._queue = []
+        self.lock = threading.Lock()
+
+    def pop(self):
+        with self.lock:
+            self._queue.pop(0)
+
+    def _push(self, item):
+        with self.lock:
+            self._queue.append(item)
+
+    def push(self, items):
+        if not isinstance(items, List):
+            items = [items]
+        for item in items:
+            self._push(item)
+
+    def is_empty(self):
+        with self.lock:
+            return bool(self._queue)
+
+
+
+
