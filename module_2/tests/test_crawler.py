@@ -1,9 +1,10 @@
+from datetime import datetime
 from os import path
 import sqlite3
 import unittest
 from unittest.mock import MagicMock, Mock, call, patch
 import psycopg2
-from src.queue import CachedQueue
+from src.queue import CachedQueue, Queue
 from src.storage import PostgresDB
 from src.downloader import Downloader
 from src.crawler import Crawler
@@ -30,10 +31,10 @@ class TestCrawler(unittest.TestCase):
             )
 
         self.crawler = Crawler(
-            downloader=Downloader(object, '2008-09-03T20:56:35.450686'),
-            downloader_queue=['1', '2', '3'],
-            parser=Parser(['spbu']),
-            parser_queue=['4', '5', '6', '7'],
+            downloader=Downloader('2008-09-03T20:56:35.450686'),
+            downloader_queue=Queue(['1', '2', '3']) ,
+            parser=Parser(start_datetime=datetime.now().isoformat(),filter_words=['test']),
+            parser_queue=Queue(['4', '5', '6', '7']),
             storage=self.postgres,
             queries=['spbu'],
         )

@@ -20,7 +20,7 @@ class TestQueue(unittest.TestCase):
         self.assertEqual(self.queue.pop(), self.initial_items[0])
 
     def test_len(self):
-        self.assertEqual(len(self.queue), len(self.initial_items))
+        self.assertEqual(len(self.queue._queue), len(self.initial_items))
 
 class TestCachedQueue(unittest.TestCase):
     def setUp(self) -> None:

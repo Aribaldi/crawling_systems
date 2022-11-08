@@ -1,7 +1,9 @@
 start_datetime: "2022-01-01"
 vk:
-  login: YOUR_VK_LOGIN
-  password: YOUR_VK_PASSWORD
+#  login: "YOUR_VK_LOGIN"
+#  password: YOUR_VK_PASSWORD
+  access_token: "YOUR_ACCESS_TOKEN"
+  v: "1.3"
 db:
   host: localhost
   db_name: crawler_storage

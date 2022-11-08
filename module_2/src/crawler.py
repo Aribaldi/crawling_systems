@@ -1,8 +1,12 @@
 import logging
-from typing import Optional
+import threading
 
-from src.queue import CachedQueue
-from src.storage import PostgresDB
+from typing import Optional, List
+
+from src.downloader import Downloader
+from src.parser import Parser
+from src.queue import CachedQueue, BaseQueue
+from src.storage import PostgresDB, Storage
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +21,12 @@ class Crawler:
             storage,
             queries,
     ):
-        self.downloader = downloader
-        self.downloader_queue = downloader_queue
-        self.parser = parser
-        self.parser_queue = parser_queue
-        self.storage = storage
-        self.queries = queries
+        self.downloader: Downloader = downloader
+        self.downloader_queue: BaseQueue = downloader_queue
+        self.parser: Parser = parser
+        self.parser_queue: BaseQueue = parser_queue
+        self.storage: Storage = storage
+        self.queries: List = queries
 
     def get_posts_by_query(self, count: Optional[int] = None):
         for query in self.queries:
@@ -39,13 +43,13 @@ class Crawler:
                                                 count=count)
 
     def get_posts_from_groups(self,  count: Optional[int] = None):
-        while len(self.downloader_queue) > 0:
+        while not self.downloader_queue.is_empty():
             self.downloader.get_posts_from_group(group=self.downloader_queue.pop(),
                                                  queue_to_push=self.parser_queue,
                                                  count=count)
 
     def parse_posts(self):
-        while len(self.parser_queue) > 0:
+        while not self.parser_queue.is_empty():
             parsed_post = self.parser.parse(self.parser_queue.pop())
             if parsed_post is not None:
                 self.storage.store_post(parsed_post)
@@ -55,3 +59,28 @@ class Crawler:
             self.storage.store_cache(self.downloader_queue.cache)
         self.storage.close()
 
+    def crawl(self):
+        self.get_posts_by_query()
+        self.get_groups_by_query(count=100)
+        self.get_posts_from_groups()
+        self.parse_posts()
+        self.close_storage()
+
+
+class MultiProcessCrawler(Crawler):
+    def crawl(self):
+
+        pr_posts_by_query = threading.Thread(target=self.get_groups_by_query, args=(100_000, ))
+        pr_groups_by_query = threading.Thread(target=self.get_groups_by_query)
+        pr_posts_from_groups = threading.Thread(target=self.get_posts_from_groups)
+        pr_parse_posts = threading.Thread(target=self.parse_posts)
+
+        pr_posts_by_query.start()
+        pr_groups_by_query.start()
+        pr_posts_from_groups.start()
+        pr_parse_posts.start()
+
+        pr_posts_by_query.join()
+        pr_groups_by_query.join()
+        pr_posts_from_groups.join()
+        pr_parse_posts.join()

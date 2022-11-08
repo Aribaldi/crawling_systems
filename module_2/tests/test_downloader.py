@@ -29,7 +29,7 @@ class TestDownloader(unittest.TestCase):
         self.vk.newsfeed.search = Mock(return_value={'items':[]})
         self.vk.groups.search = Mock(return_value={'items':[]})
         self.vk.wall.get = Mock(return_value={'items':[]})
-        self.downloader = Downloader(self.vk, datetime(2022, 11, 4).isoformat())
+        self.downloader = Downloader(vk=self.vk, start_datetime=datetime(2022, 11, 4).isoformat())
         return super().setUp()
 
     def test_get_posts_by_query(self):

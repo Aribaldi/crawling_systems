@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import Dict
 import logging
 
@@ -44,12 +45,14 @@ def select_fields(post_dict):
 
 
 class Parser:
-    def __init__(self, filter_words):
+    def __init__(self, start_datetime, filter_words):
         self.filter_words = filter_words
+        self.start_datetime = datetime.fromisoformat(start_datetime)
 
     def parse(self, post_dict: Dict):
         post = select_fields(post_dict)
-        if post is not None:
+
+        if post is not None and datetime.fromtimestamp(post.date) > self.start_datetime:
             post.text = preprocess_text(post.text)
             if any(word in post.text for word in self.filter_words):
                 return post

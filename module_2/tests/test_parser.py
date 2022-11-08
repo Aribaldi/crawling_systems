@@ -1,16 +1,17 @@
+from datetime import datetime
 import unittest
 from src.post import Post
 from src.parser import Parser
 
 class TestParser(unittest.TestCase):
     def setUp(self) -> None:
-        self.parser = Parser(['test'])
+        self.parser = Parser(start_datetime=datetime.now().isoformat(),filter_words=['test'])
 
         self.payload = {
             'id': 0,
             'owner_id': 0,
             'from_id': 0,
-            'date': 0,
+            'date': datetime(2048, 1, 1).timestamp(),
             'text': 'test text',
             'comments': {
                 'count': 0,
@@ -44,9 +45,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(post, self.post)
 
     def test_parser_parse_without_filter_words(self):
-        parser = Parser([])
+        parser = Parser(start_datetime=datetime.now().isoformat(),filter_words=['test'])
         post = parser.parse(self.payload)
-        self.assertEqual(post, None)
+        self.assertEqual(post, self.post)
 
     def test_parser_parse_without_views(self):
         del self.payload['views']

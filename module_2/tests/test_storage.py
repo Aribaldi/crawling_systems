@@ -50,7 +50,7 @@ class TestStorage(unittest.TestCase):
 
         for post in posts:
             self.conn.execute("INSERT INTO post(post_id, group_id, publisher_id, date_unix, text, " +
-                        "comments, likes, reports, views, crawler_name)\n" +
+                        "comments, likes, reposts, views, crawler_name)\n" +
                         f"VALUES ({post.post_id}, {post.group_id}, {post.publisher_id}, {post.date}, '{post.text}', " +
                         f"{post.comments}, {post.likes}, {post.reposts}, {post.views}, 'test_crawler');")
         self.conn.commit()
