@@ -1,7 +1,7 @@
 import psycopg2
 import re
 
-from src.post import Post
+from module_2.src.post import Post
 
 
 def preprocess_group_name(name):
