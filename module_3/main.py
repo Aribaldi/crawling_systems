@@ -6,6 +6,8 @@ import pickle
 import time
 import os
 from search import search_wrapper
+from zip_index import zip_ind
+import os
 
 DEFAULT_SAVE_PATH = Path("./module_3")
 
@@ -26,8 +28,6 @@ def main(args: argparse.Namespace):
     t_elapsed = time.time() - t_start
     bench_file = open(args.save_path / "bench.txt", "a+")
     bench_file.write(f"INDEX: Number of docs: {args.docs_num} \t Time elapsed: {t_elapsed}\n")
-    bench_file.write("#"*128)
-    bench_file.write("\n")
     
 
     if args.format == "json":
@@ -47,7 +47,40 @@ def main(args: argparse.Namespace):
     elif args.format == "pickle":
         docs_num, found_posts = search_wrapper(args.save_path / f"{args.docs_num}_index.pickle", args.query, 10)
     t_elapsed = time.time() - t_start
+
     bench_file.write(f"SEARCH: Number of docs with query '{args.query}': {docs_num} \t Time elapsed: {t_elapsed}\n")
+
+    t_start = time.time()
+    if args.format == "json":
+        orignal_size = os.path.getsize(args.save_path / f"{args.docs_num}_index.json") / 1024 / 1024
+        zip_ind(
+            args.save_path / f"{args.docs_num}_index.json", 
+            args.save_path / f"{args.docs_num}_docs.json", 
+            args.save_path / f"{args.docs_num}_delta_index.pickle",
+            args.save_path / f"{args.docs_num}_docs_zipped.pickle",
+            args.save_path / f"{args.docs_num}_numbered_index.pickle"
+        )
+    elif args.format == "pickle":
+        orignal_size = os.path.getsize(args.save_path / f"{args.docs_num}_index.pickle") / 1024 / 1024
+        zip_ind(
+            args.save_path / f"{args.docs_num}_index.pickle", 
+            args.save_path / f"{args.docs_num}_docs.pickle", 
+            args.save_path / f"{args.docs_num}_delta_index.pickle",
+            args.save_path / f"{args.docs_num}_docs_zipped.pickle",
+            args.save_path / f"{args.docs_num}_numbered_index.pickle"
+        )
+    zipped_size = os.path.getsize(args.save_path / f"{args.docs_num}_delta_index.pickle") / 1024 / 1024
+    numbered_size = os.path.getsize(args.save_path / f"{args.docs_num}_numbered_index.pickle") / 1024 / 1024
+
+
+    t_elapsed = time.time() - t_start
+
+
+    bench_file.write(f"ZIP: Number of docs: {args.docs_num} \t Time elapsed: {t_elapsed}\
+    Original index size: {orignal_size} \t Numbered indexed size: {numbered_size}\
+    Zipped index size: {zipped_size} \n")
+    bench_file.write("#"*128)
+    bench_file.write("\n")
     bench_file.flush()
     bench_file.close()
     
