@@ -4,16 +4,42 @@ import operator as op
 import numpy as np
 import json
 
+
 def gamma_coding(a):
+    if (a <= 0).any():
+        raise ValueError("All values in a must be positive")
+
     a = a.view(f'u{a.itemsize}')
     l = np.log2(a).astype('u1')
-    L = ((l<<1)+1).cumsum()
+    L = ((l<<1)+1).cumsum().astype(np.int64)
     out = np.zeros(L[-1],'u1')
     for i in range(l.max()+1):
         out[L-i-1] += (a>>i)&1
-    return np.packbits(out)
+    return np.packbits(out), out.size
 
 
+def gamma_decoding(b, n):
+    b = np.unpackbits(b, count=n).view(bool)
+    s = b.nonzero()[0]
+    s = (s << 1).repeat(np.diff(s, prepend=-1))
+    s -= np.arange(-1, len(s) - 1)
+    s = s.tolist()  # list has faster __getitem__
+    ns = len(s)
+
+    def gen():
+        idx = 0
+        yield idx
+        while idx < ns:
+            idx = s[idx]
+            yield idx
+
+    offs = np.fromiter(gen(), int)
+    sz = np.diff(offs) >> 1
+    mx = sz.max() + 1
+    out = np.zeros(offs.size - 1, int)
+    for i in range(mx):
+        out[b[offs[1:] - i - 1] & (sz >= i)] += 1 << i
+    return out
 
 
 def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_path: Path, numbered_index_path: Path):
@@ -31,7 +57,7 @@ def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_pa
             map(
                 op.itemgetter(0),
                 sorted(docs_counts.items(), key=op.itemgetter(1), reverse=True),
-            )
+            ), start=1
         )
     )
     numbered_docs = {el[1]: el[0] for el in sorted_docs_counts}
@@ -67,12 +93,11 @@ def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_pa
     }
 
     encoded_delta_index = {
-        term: gamma_coding(docs).tobytes() for term, docs in diffs_index.items()
+        term: gamma_coding(docs)[0].tobytes() for term, docs in diffs_index.items()
     }
 
     with open(zip_index_path, "wb") as fp:
         pickle.dump(encoded_delta_index, fp)
-    
 
 
 if __name__ == "__main__":
