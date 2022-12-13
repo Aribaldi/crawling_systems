@@ -42,7 +42,17 @@ def gamma_decoding(b, n):
     return out
 
 
-def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_path: Path, numbered_index_path: Path):
+def delta_encoding(a):
+    out = np.zeros(a.shape[0])
+    for i in range(a.shape[0]):
+        bin_repr = np.binary_repr(num)
+        bits_num = len(bin_repr)
+        gamma_coded = gamma_coding(bits_num)
+        out[i] = np.packbits([gamma_coded, bin_repr.tobytes()])
+    return out
+
+
+def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_path: Path, numbered_index_path: Path, enc_type: str):
 
     # def code(ids: tuple[int, str]):
     #     id, database_id = ids
@@ -92,9 +102,14 @@ def zip_ind(index_path: Path, docs_path: Path, zip_index_path: Path, zip_docs_pa
         term: np.array(docs) if len(docs) == 1 else np.diff(docs) for term, docs in numbered_index.items()
     }
 
-    encoded_delta_index = {
-        term: gamma_coding(docs)[0].tobytes() for term, docs in diffs_index.items()
-    }
+    if enc_type == "gamma":
+        encoded_delta_index = {
+            term: gamma_coding(docs)[0].tobytes() for term, docs in diffs_index.items()
+        }
+    if enc_type == "delta":
+        encoded_delta_index = {
+            term: gamma_coding(docs)[0].tobytes() for term, docs in diffs_index.items()
+        }
 
     with open(zip_index_path, "wb") as fp:
         pickle.dump(encoded_delta_index, fp)

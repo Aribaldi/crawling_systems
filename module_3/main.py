@@ -17,6 +17,7 @@ parser.add_argument("docs_num", type=int)
 parser.add_argument("query", type=str)
 parser.add_argument("--save_path", nargs="?", type=Path, default=DEFAULT_SAVE_PATH)
 parser.add_argument("--format", nargs="?", type=str, default="json")
+parser.add_argument("--format", nargs="?", type=str, default="gamma")
 
 
 def main(args: argparse.Namespace):
@@ -58,7 +59,8 @@ def main(args: argparse.Namespace):
             args.save_path / f"{args.docs_num}_docs.json", 
             args.save_path / f"{args.docs_num}_delta_index.pickle",
             args.save_path / f"{args.docs_num}_docs_zipped.pickle",
-            args.save_path / f"{args.docs_num}_numbered_index.pickle"
+            args.save_path / f"{args.docs_num}_numbered_index.pickle",
+            args.enc_type
         )
     elif args.format == "pickle":
         orignal_size = os.path.getsize(args.save_path / f"{args.docs_num}_index.pickle") / 1024 / 1024
@@ -67,7 +69,8 @@ def main(args: argparse.Namespace):
             args.save_path / f"{args.docs_num}_docs.pickle", 
             args.save_path / f"{args.docs_num}_delta_index.pickle",
             args.save_path / f"{args.docs_num}_docs_zipped.pickle",
-            args.save_path / f"{args.docs_num}_numbered_index.pickle"
+            args.save_path / f"{args.docs_num}_numbered_index.pickle",
+            args.enc_type
         )
     zipped_size = os.path.getsize(args.save_path / f"{args.docs_num}_delta_index.pickle") / 1024 / 1024
     numbered_size = os.path.getsize(args.save_path / f"{args.docs_num}_numbered_index.pickle") / 1024 / 1024
